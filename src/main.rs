@@ -127,6 +127,7 @@ fn battery_level_stream() -> BoxStream<'static, BatteryLevel> {
 enum NotificationState {
     NotifiedLow(Instant),
     NotifiedCritical(Instant),
+    Charging,
     NeverNotified,
 }
 
@@ -137,34 +138,37 @@ async fn battery_notifier() -> Result<(), anyhow::Error> {
 
     let mut battery_stream = battery_level_stream();
     let mut notification_state = NeverNotified;
-    let frequency = Duration::from_secs(5 * 60);
+    let crit_frequency = Duration::from_secs(60);
+    let low_frequency = Duration::from_secs(5 * 60);
 
     while let Some(level) = battery_stream.next().await {
         println!("Current battery: {level}");
         let now = Instant::now();
         let battery_charging = battery_charging().await?;
 
-        if !battery_charging
+        if battery_charging {
+            notification_state = Charging
+        } else if !battery_charging
             && level <= CRITICAL_BATTERY_LEVEL
-            && !(matches!(notification_state,
-                 NotifiedCritical(t) if now.duration_since(t) >= frequency))
+            && !matches!(notification_state,
+                 NotifiedCritical(t) if now.duration_since(t) < crit_frequency)
         {
             println!("Battery critical!");
             notification_service.notify_critical_battery(level)?;
-            notification_state = NotifiedCritical(Instant::now())
+            notification_state = NotifiedCritical(now)
         } else if !battery_charging
             && level <= LOW_BATTERY_LEVEL
             && !matches!(notification_state,
-                NotifiedLow(t) if now.duration_since(t) >= frequency)
+                NotifiedLow(t) if now.duration_since(t) < low_frequency)
             && !matches!(notification_state,
-                NotifiedCritical(t) if now.duration_since(t) >= frequency)
+                NotifiedCritical(t) if now.duration_since(t) < low_frequency)
         {
             println!("Battery low!");
             notification_service.notify_low_battery(level)?;
-            notification_state = NotifiedLow(Instant::now())
+            notification_state = NotifiedLow(now)
         }
 
-        sleep(Duration::from_secs(10)).await;
+        sleep(Duration::from_secs(60)).await;
     }
 
     Ok(())
