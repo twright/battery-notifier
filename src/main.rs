@@ -21,7 +21,7 @@ async fn battery_charging() -> Result<bool, anyhow::Error> {
     let raw_charging_level = String::from_utf8(read(BATTERY_CHARGING).await?)?;
     match raw_charging_level.trim() {
         "Charging" => Ok(true),
-        "Discharging" => Ok(false),
+        "Unknown" | "Discharging" | "Not charging" | "Full" => Ok(false),
         _ => Err(anyhow!("Invalid charging status")),
     }
 }
