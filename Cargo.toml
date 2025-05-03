@@ -1,0 +1,12 @@
+[package]
+name = "battery-notifier"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.98"
+async-stream = "0.3.6"
+contracts = "0.6.5"
+futures = "0.3.31"
+libnotify = "1.0.3"
+tokio = { version = "1.44.2", features = ["full"] }
