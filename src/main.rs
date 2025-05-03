@@ -6,7 +6,7 @@ use async_stream::stream;
 use contracts::{ensures, requires};
 use futures::StreamExt;
 use futures::stream::BoxStream;
-use libnotify::Notification;
+use libnotify::{Notification, Urgency};
 use tokio::fs::read;
 use tokio::time::sleep;
 
@@ -58,6 +58,7 @@ impl NotificationService {
             format!("Battery critical at {}", level).as_str(),
             "battery-caution",
         );
+        notification.set_urgency(Urgency::Critical);
         notification.set_timeout(i32::MAX);
         notification.show()?;
         Ok(())
@@ -70,6 +71,7 @@ impl NotificationService {
             "battery-low",
         );
         notification.show()?;
+        notification.set_urgency(Urgency::Critical);
         notification.set_timeout(i32::MAX);
         Ok(())
     }
