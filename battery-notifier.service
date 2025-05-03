@@ -1,0 +1,10 @@
+[Unit]
+Description=Battery notifier
+
+[Service]
+Type=simple
+StandardOutput=journal
+ExecStart=/var/home/[USERNAME]/.local/bin/battery-notifier
+
+[Install]
+WantedBy=default.target
