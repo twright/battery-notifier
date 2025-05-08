@@ -108,7 +108,7 @@ impl Display for BatteryLevel {
 }
 
 fn calc_battery_level(current: f32, total: f32) -> BatteryLevel {
-    let level: i32 = ((current / total) * 100.0).round() as i32;
+    let level: i32 = (((current / total) * 100.0).round() as i32).max(100);
     BatteryLevel::new(level)
 }
 

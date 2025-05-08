@@ -1,10 +1,13 @@
 [Unit]
 Description=Battery notifier
+StartLimitIntervalSec=10
+StartLimitBurst=2
 
 [Service]
 Type=simple
 StandardOutput=journal
 ExecStart=/var/home/[USERNAME]/.local/bin/battery-notifier
+Restart=on-failure
 
 [Install]
 WantedBy=default.target
